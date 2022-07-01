@@ -14,7 +14,6 @@ export class AuthService {
   audience = environment.auth0.audience;
   clientId = environment.auth0.clientId;
   callbackURL = environment.auth0.callbackURL;
-
   token: string;
   payload: any;
 
@@ -30,17 +29,31 @@ export class AuthService {
     link += 'redirect_uri=' + this.callbackURL + callbackPath;
     return link;
   }
+  build_logout_link(logoutPath = '') {
+    let logout_link = 'https://';
+    logout_link += this.url + '.auth0.com';
+    logout_link += '/v2/logout?';
+    logout_link += 'client_id=' + this.clientId + '&';
+    logout_link += 'returnTo=' + this.callbackURL + logoutPath;
+    return logout_link;
+  }
 
   // invoked in app.component on load
   check_token_fragment() {
     // parse the fragment
-    const fragment = window.location.hash.substr(1).split('&')[0].split('=');
-    // check if the fragment includes the access token
-    if ( fragment[0] === 'access_token' ) {
-      // add the access token to the jwt
-      this.token = fragment[1];
-      // save jwts to localstore
-      this.set_jwt();
+    const fragment = window.location.hash.substring(1).split('&')[0].split('=');
+    // console.log(fragment)
+    if(fragment[0]){
+      // check if the fragment includes the access token
+      if ( fragment[0] === 'access_token' ) {
+        // add the access token to the jwt
+        this.token = fragment[1];
+        // save jwts to localstore
+        this.set_jwt();
+      }
+    }
+    else{
+      this.logout()
     }
   }
 
